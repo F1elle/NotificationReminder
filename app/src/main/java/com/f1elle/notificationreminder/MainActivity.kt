@@ -17,6 +17,7 @@ import com.f1elle.notificationreminder.ui.theme.NotificationReminderTheme
 class myModel: ViewModel(){
     val emptyCard = CardContent("", "")
     val isInEditMode: MutableLiveData<Boolean> = MutableLiveData(false)
+    var cardIndex = -1
     var cardTitle by mutableStateOf(emptyCard.title)
     var cardContent by mutableStateOf(emptyCard.content)
 
@@ -25,22 +26,26 @@ class myModel: ViewModel(){
         cardTitle = card.title
         cardContent = card.content
     }
-    fun enableEditMode(cardToEdit: CardContent){
+    fun enableEditMode(cardToEdit: CardContent, index: Int){
+        cardIndex = index
         setCard(cardToEdit)
         isInEditMode.value = true
         buttonContent.value = "Edit note"
     }
     fun disableEditMode(){
         isInEditMode.value = false
+        cardIndex = -1
         setCard(emptyCard)
         buttonContent.value = "Add note"
     }
     fun noteButton(cardList: SnapshotStateList<CardContent>, title: String, content: String){
-        cardList.add(CardContent(title, content))
+        if (isInEditMode.value == false){
+            cardList.add(CardContent(title, content))}
+        else{
+            cardList.set(cardIndex, CardContent(title, content))
+        }
     }
-    fun noteButton(cardList: SnapshotStateList<CardContent>, title: String, content: String, index: Int){
-        cardList.set(index, CardContent(title, content))
-    }
+
 }
 
 class MainActivity : ComponentActivity() {

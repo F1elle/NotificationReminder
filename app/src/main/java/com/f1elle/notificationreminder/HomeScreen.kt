@@ -29,9 +29,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutlinedCardInterface(card: CardContent, index: Int, cardList: SnapshotStateList<CardContent>, backdropConceal: (CardContent) -> Unit){
+fun OutlinedCardInterface(card: CardContent, index: Int, cardList: SnapshotStateList<CardContent>, backdropConceal: (CardContent, Int) -> Unit){
     OutlinedCard(shape = MaterialTheme.shapes.large,
-        onClick = { backdropConceal(cardList[index]) },
+        onClick = { backdropConceal(cardList[index], index) },
         modifier = Modifier
             .fillMaxWidth()
             .size(100.dp)) {
@@ -63,14 +63,10 @@ fun OutlinedCardInterface(card: CardContent, index: Int, cardList: SnapshotState
 fun HomeScreen(viewModel: myModel){
 
     val cardList = remember { mutableStateListOf<CardContent>()}
-    fun addNote(title: String, content: String){
-        val card = CardContent(title, content)
-        cardList.add(card)
-    }
     val coroutineScope = rememberCoroutineScope()
     val backdropState = rememberBackdropScaffoldState(BackdropValue.Revealed)
-    fun backDropConceal(getcard: CardContent){
-        viewModel.enableEditMode(getcard)
+    fun backDropConceal(getcard: CardContent, index: Int){
+        viewModel.enableEditMode(getcard, index)
         coroutineScope.launch{
             backdropState.conceal() }
     }
@@ -130,9 +126,7 @@ fun HomeScreen(viewModel: myModel){
                         placeholder = {Text("Note")})
                     val btn_state = (if(viewModel.cardTitle != "") true else false)
                     fun btn_click(){
-                        if (viewModel.isInEditMode.value == false){
-                            viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode()}
-                        else ()
+                        viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode()
                         }
                     Button(onClick = {btn_click()}, content = {Text((viewModel.buttonContent.value.toString()))},
                     enabled = btn_state)
