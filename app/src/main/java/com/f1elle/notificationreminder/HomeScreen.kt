@@ -9,6 +9,7 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.BackdropScaffold
 import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -122,7 +123,6 @@ fun HomeScreen(viewModel: myModel){
                        verticalArrangement = Arrangement.SpaceEvenly,
                        horizontalAlignment = Alignment.End) {
                     //var Title by remember { mutableStateOf(TextFieldValue("")) }
-                    val keyboardController = LocalSoftwareKeyboardController.current
                     /*if (backdropState.isRevealed){
                         keyboardController?.hide()
                         viewModel.disableEditMode()}*/
@@ -141,7 +141,6 @@ fun HomeScreen(viewModel: myModel){
                     fun btn_click(){addNote(viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode()}
                     Button(onClick = {btn_click()}, content = {Text((viewModel.buttonContent.value.toString()))},
                     enabled = btn_state)
-                    //Button(onClick = {/*TODO*/}, content = {viewModel.card.value?.title.toString()})
 
                 }
         }
@@ -149,9 +148,14 @@ fun HomeScreen(viewModel: myModel){
         frontLayerBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         headerHeight = (0.dp)
     ) {
-
-    }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        if (backdropState.isRevealed){
+            keyboardController?.hide()
+            viewModel.disableEditMode()}
         }
+    }
+
+
 
 
 
