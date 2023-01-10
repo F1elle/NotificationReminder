@@ -70,8 +70,8 @@ fun HomeScreen(viewModel: myModel){
     val coroutineScope = rememberCoroutineScope()
     val backdropState = rememberBackdropScaffoldState(BackdropValue.Revealed)
     fun backDropConceal(getcard: CardContent){
+        viewModel.enableEditMode(getcard)
         coroutineScope.launch{
-            viewModel.enableEditMode(getcard)
             backdropState.conceal() }
     }
     BackdropScaffold(
@@ -122,15 +122,6 @@ fun HomeScreen(viewModel: myModel){
                     .padding(15.dp),
                        verticalArrangement = Arrangement.SpaceEvenly,
                        horizontalAlignment = Alignment.End) {
-                    //var Title by remember { mutableStateOf(TextFieldValue("")) }
-                    /*if (backdropState.isRevealed){
-                        keyboardController?.hide()
-                        viewModel.disableEditMode()}*/
-
-                    //var Title by rememberSaveable{ mutableStateOf(viewModel.card.value?.title.toString()) }
-                    //var Note by rememberSaveable{ mutableStateOf(viewModel.card.value?.content.toString()) }
-                    //val Title = viewModel.cardTitle.collectAsState()
-                    //val Note = viewModel.cardContent.collectAsState()
                     OutlinedTextField(value = viewModel.cardTitle, onValueChange = { viewModel.cardTitle = it },
                     shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth(),
                         placeholder = {Text("Title")})
@@ -138,7 +129,11 @@ fun HomeScreen(viewModel: myModel){
                     shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth(),
                         placeholder = {Text("Note")})
                     val btn_state = (if(viewModel.cardTitle != "") true else false)
-                    fun btn_click(){addNote(viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode()}
+                    fun btn_click(){
+                        if (viewModel.isInEditMode.value == false){
+                            viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode()}
+                        else ()
+                        }
                     Button(onClick = {btn_click()}, content = {Text((viewModel.buttonContent.value.toString()))},
                     enabled = btn_state)
 
@@ -148,6 +143,7 @@ fun HomeScreen(viewModel: myModel){
         frontLayerBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         headerHeight = (0.dp)
     ) {
+
         val keyboardController = LocalSoftwareKeyboardController.current
         if (backdropState.isRevealed){
             keyboardController?.hide()

@@ -8,6 +8,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.f1elle.notificationreminder.ui.theme.NotificationReminderTheme
@@ -16,10 +17,6 @@ import com.f1elle.notificationreminder.ui.theme.NotificationReminderTheme
 class myModel: ViewModel(){
     val emptyCard = CardContent("", "")
     val isInEditMode: MutableLiveData<Boolean> = MutableLiveData(false)
-    //private val _cardTitle = MutableStateFlow(emptyCard.title)
-    //private val _cardContent = MutableStateFlow(emptyCard.content)
-    //val cardTitle = _cardTitle.asStateFlow()
-    //val cardContent = _cardContent.asStateFlow()
     var cardTitle by mutableStateOf(emptyCard.title)
     var cardContent by mutableStateOf(emptyCard.content)
 
@@ -28,17 +25,6 @@ class myModel: ViewModel(){
         cardTitle = card.title
         cardContent = card.content
     }
-/*
-    fun setTitle(cardTitle: String){
-        _cardTitle.value = cardTitle
-    }
-    fun setContent(cardContent: String){
-        _cardContent.value = cardContent
-    }
-    fun setCard(card: CardContent){
-        _cardTitle.value = card.title
-        _cardContent.value = card.content
-    }*/
     fun enableEditMode(cardToEdit: CardContent){
         setCard(cardToEdit)
         isInEditMode.value = true
@@ -48,6 +34,12 @@ class myModel: ViewModel(){
         isInEditMode.value = false
         setCard(emptyCard)
         buttonContent.value = "Add note"
+    }
+    fun noteButton(cardList: SnapshotStateList<CardContent>, title: String, content: String){
+        cardList.add(CardContent(title, content))
+    }
+    fun noteButton(cardList: SnapshotStateList<CardContent>, title: String, content: String, index: Int){
+        cardList.set(index, CardContent(title, content))
     }
 }
 
