@@ -1,5 +1,6 @@
 package com.f1elle.notificationreminder
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -56,6 +57,7 @@ fun OutlinedCardInterface(card: CardContent, index: Int, cardList: SnapshotState
 
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class
 )
@@ -66,9 +68,14 @@ fun HomeScreen(viewModel: myModel){
     val coroutineScope = rememberCoroutineScope()
     val backdropState = rememberBackdropScaffoldState(BackdropValue.Revealed)
     fun backDropConceal(getcard: CardContent, index: Int){
-        viewModel.enableEditMode(getcard, index)
         coroutineScope.launch{
-            backdropState.conceal() }
+            backdropState.conceal()
+            viewModel.enableEditMode(getcard, index)}
+    }
+    fun backDropReveal(){
+        coroutineScope.launch {
+            backdropState.reveal()
+        }
     }
     BackdropScaffold(
         scaffoldState = backdropState,
@@ -126,7 +133,7 @@ fun HomeScreen(viewModel: myModel){
                         placeholder = {Text("Note")})
                     val btn_state = (if(viewModel.cardTitle != "") true else false)
                     fun btn_click(){
-                        viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode()
+                        viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode(::backDropReveal)
                         }
                     Button(onClick = {btn_click()}, content = {Text((viewModel.buttonContent.value.toString()))},
                     enabled = btn_state)
@@ -137,11 +144,12 @@ fun HomeScreen(viewModel: myModel){
         frontLayerBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         headerHeight = (0.dp)
     ) {
-
         val keyboardController = LocalSoftwareKeyboardController.current
         if (backdropState.isRevealed){
-            keyboardController?.hide()
-            viewModel.disableEditMode()}
+            coroutineScope.launch{
+                keyboardController?.hide()
+                viewModel.disableEditMode(::backDropReveal) }
+            }
         }
     }
 

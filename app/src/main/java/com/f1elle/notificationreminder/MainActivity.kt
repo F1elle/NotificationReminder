@@ -32,7 +32,8 @@ class myModel: ViewModel(){
         isInEditMode.value = true
         buttonContent.value = "Edit note"
     }
-    fun disableEditMode(){
+    fun disableEditMode(backDropReveal: () -> Unit){
+        backDropReveal()
         isInEditMode.value = false
         cardIndex = -1
         setCard(emptyCard)
