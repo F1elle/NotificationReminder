@@ -2,6 +2,7 @@ package com.f1elle.notificationreminder
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -58,19 +60,18 @@ fun OutlinedCardInterface(card: CardContent, index: Int, cardList: SnapshotState
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalComposeUiApi::class
-)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: myModel){
 
     val cardList = remember { mutableStateListOf<CardContent>()}
     val coroutineScope = rememberCoroutineScope()
     val backdropState = rememberBackdropScaffoldState(BackdropValue.Revealed)
+    val focusManager = LocalFocusManager.current
     fun backDropConceal(getcard: CardContent, index: Int){
+        viewModel.EditNote(getcard, index)
         coroutineScope.launch{
-            backdropState.conceal()
-            viewModel.enableEditMode(getcard, index)}
+            backdropState.conceal() }
     }
     fun backDropReveal(){
         coroutineScope.launch {
@@ -88,8 +89,10 @@ fun HomeScreen(viewModel: myModel){
             .background(color = MaterialTheme.colorScheme.background),
             floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
-                ExtendedFloatingActionButton(onClick = {coroutineScope.launch{
-                    backdropState.conceal() }}){
+                ExtendedFloatingActionButton(onClick = {
+                    viewModel.clearFields()
+                    coroutineScope.launch{
+                        backdropState.conceal() } }){
                     Icon(Icons.Filled.Add, null)
                     Text("Add")
                 }
@@ -126,14 +129,16 @@ fun HomeScreen(viewModel: myModel){
                        verticalArrangement = Arrangement.SpaceEvenly,
                        horizontalAlignment = Alignment.End) {
                     OutlinedTextField(value = viewModel.cardTitle, onValueChange = { viewModel.cardTitle = it },
-                    shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().focusable(),
                         placeholder = {Text("Title")})
                     OutlinedTextField(value = viewModel.cardContent, onValueChange = { viewModel.cardContent = it },
-                    shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().focusable(),
                         placeholder = {Text("Note")})
                     val btn_state = (if(viewModel.cardTitle != "") true else false)
                     fun btn_click(){
-                        viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent); viewModel.disableEditMode(::backDropReveal)
+                        viewModel.noteButton(cardList, viewModel.cardTitle, viewModel.cardContent)
+                        viewModel.clearFields()
+                        backDropReveal()
                         }
                     Button(onClick = {btn_click()}, content = {Text((viewModel.buttonContent.value.toString()))},
                     enabled = btn_state)
@@ -144,11 +149,8 @@ fun HomeScreen(viewModel: myModel){
         frontLayerBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         headerHeight = (0.dp)
     ) {
-        val keyboardController = LocalSoftwareKeyboardController.current
         if (backdropState.isRevealed){
-            coroutineScope.launch{
-                keyboardController?.hide()
-                viewModel.disableEditMode(::backDropReveal) }
+            viewModel.onReveal(focusManager)
             }
         }
     }
