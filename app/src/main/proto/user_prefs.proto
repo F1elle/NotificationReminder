@@ -1,0 +1,4 @@
+syntax = "proto3";
+
+option java_package = "com.f1elle.notificationreminder";
+option java_multiple_files = true;
